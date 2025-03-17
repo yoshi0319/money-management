@@ -17,4 +17,4 @@ frontend/node_modules/
 *.log
 
 # docs
-docs/
+DOCS.md
