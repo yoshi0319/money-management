@@ -50,22 +50,37 @@ def save_user_money(sender, instance, **kwargs):
 
 class Record(models.Model):
     record_id = models.AutoField(primary_key=True)
-    user_id = models.OneToOneField(
+    user_id = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="record",
     )
     date = models.DateField()
     method_choices = (
-        ("convenient_store", "コンビニ"),
+        ("convenience_store", "コンビニ"),
         ("food", "飲食店"),
         ("supermarket", "スーパー"),
         ("cafe", "カフェ"),
         ("other", "その他"),
     )
     method = models.CharField(
-        max_length=16, choices=method_choices, default="convenient_store"
+        max_length=17, choices=method_choices, default="convenience_store"
     )
     recorded_money = models.IntegerField(default=0)
     amount = models.IntegerField(default=0)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        # 合計を自動計算
+        total = (
+            Record.objects.filter(user_id=self.user_id)
+            .exclude(record_id=self.record_id)
+            .aggregate(total=models.Sum("recorded_money"))["total"]
+            or 0
+        )
+        self.amount = total + self.recorded_money
+
+        # Moneyテーブルも更新
+        Money.objects.filter(user_id=self.user_id).update(amount=self.amount)
+
+        super().save(*args, **kwargs)

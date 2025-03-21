@@ -65,4 +65,4 @@ class RecordSerializer(serializers.ModelSerializer):
             "amount",
             "updated_at",
         )
-        read_only_fields = ("id", "updated_at")
+        read_only_fields = ("id", "amount", "updated_at")
