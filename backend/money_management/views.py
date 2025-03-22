@@ -11,11 +11,20 @@ class UserViewSet(viewsets.ModelViewSet):  # CRUD全て可能
     serializer_class = UserSerializer
 
 
-class MoneyViewSet(  # Rだけ可能
+class MoneyViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
     queryset = Money.objects.all()
     serializer_class = MoneySerializer
+
+    def get_queryset(self):
+        user_id = self.request.query_params.get("user_id")
+        queryset = Money.objects.all()
+
+        if user_id:
+            queryset = queryset.filter(user_id=user_id)
+
+        return queryset
 
 
 class RecordViewSet(viewsets.ModelViewSet):  # CRUD全て可能
