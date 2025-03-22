@@ -51,6 +51,7 @@ class MoneySerializer(serializers.ModelSerializer):
 
 
 class RecordSerializer(serializers.ModelSerializer):
+    record_id = serializers.SerializerMethodField()
     method_display = serializers.CharField(source="get_method_display", read_only=True)
 
     class Meta:
@@ -65,4 +66,9 @@ class RecordSerializer(serializers.ModelSerializer):
             "amount",
             "updated_at",
         )
-        read_only_fields = ("id", "amount", "updated_at")
+        read_only_fields = ("record_id", "amount", "updated_at")
+
+    def get_record_id(self, obj):
+        return Record.objects.filter(
+            user_id=obj.user_id, record_id__lte=obj.record_id
+        ).count()
