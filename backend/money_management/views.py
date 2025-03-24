@@ -1,8 +1,17 @@
 from django.shortcuts import render
 from rest_framework import viewsets, mixins
 from .models import User, Money, Record
-from .serializers import UserSerializer, MoneySerializer, RecordSerializer
+from .serializers import (
+    UserSerializer,
+    MoneySerializer,
+    RecordSerializer,
+    UserRegistrationSerializer,
+)
 from django.db import models, transaction
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 
 # Create your views here.
@@ -14,6 +23,7 @@ class UserViewSet(viewsets.ModelViewSet):  # CRUD全て可能
 class MoneyViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
+    permission_classes = [IsAuthenticated]
     queryset = Money.objects.all()
     serializer_class = MoneySerializer
 
@@ -28,6 +38,7 @@ class MoneyViewSet(
 
 
 class RecordViewSet(viewsets.ModelViewSet):  # CRUD全て可能
+    permission_classes = [IsAuthenticated]
     queryset = Record.objects.all()
     serializer_class = RecordSerializer
 
@@ -96,3 +107,12 @@ class RecordViewSet(viewsets.ModelViewSet):  # CRUD全て可能
         Money.objects.filter(user_id=user).update(amount=new_total)
 
         instance.delete()
+
+
+@api_view(["POST"])
+def register_user(request):
+    serializer = UserRegistrationSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
