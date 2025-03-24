@@ -1,10 +1,30 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 
 
 # Create your models here.
-class User(models.Model):
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email_address, password=None, **extra_fields):
+        if not email_address:
+            raise ValueError("メールアドレスは必須です")
+        user = self.model(email_address=email_address, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email_address, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        return self.create_user(email_address, password, **extra_fields)
+
+
+class User(AbstractUser):
+    username = None
+    USERNAME_FIELD = "email_address"  # 認証に使用するフィールドを指定
+    REQUIRED_FIELDS = ["user_name"]  # スーパーユーザー作成時に必要なフィールド
+    objects = CustomUserManager()  # カスタムマネージャーを追加
     first_name = models.CharField(max_length=32)
     family_name = models.CharField(max_length=32)
     user_name = models.CharField(max_length=32)
@@ -16,14 +36,6 @@ class User(models.Model):
         error_messages={
             "unique": "このメールアドレスはすでに使用されています",
             "required": "メールアドレスは必須です。",
-        },
-    )
-    password = models.CharField(
-        max_length=128,
-        null=False,
-        blank=False,
-        error_messages={
-            "required": "パスワードは必須です。",
         },
     )
     created_at = models.DateTimeField(auto_now_add=True)

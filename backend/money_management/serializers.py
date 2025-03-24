@@ -3,6 +3,8 @@ from .models import User, Money, Record
 
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
         fields = (
@@ -31,6 +33,16 @@ class UserSerializer(serializers.ModelSerializer):
                 },
             },
         }
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            email_address=validated_data["email_address"],
+            password=validated_data["password"],
+            first_name=validated_data["first_name"],
+            family_name=validated_data["family_name"],
+            user_name=validated_data["user_name"],
+        )
+        return user
 
     def validate_email_address(self, value):
         if not value:
@@ -72,3 +84,21 @@ class RecordSerializer(serializers.ModelSerializer):
         return Record.objects.filter(
             user_id=obj.user_id, record_id__lte=obj.record_id
         ).count()
+
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ("email_address", "password", "first_name", "family_name", "user_name")
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            email_address=validated_data["email_address"],
+            password=validated_data["password"],
+            first_name=validated_data["first_name"],
+            family_name=validated_data["family_name"],
+            user_name=validated_data["user_name"],
+        )
+        return user
