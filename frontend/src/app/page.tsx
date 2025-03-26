@@ -1,5 +1,5 @@
-import { TextField, Typography } from "@mui/material";
-
+import { InputAdornment, TextField, Typography } from "@mui/material";
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 export default function Register() {
   return (
     <div className="flex justify-center items-center flex-col">
@@ -11,8 +11,32 @@ export default function Register() {
           <TextField id="standard-basic" label="Family-name" variant="standard" sx={{ width: "50%" }}/>
         </div>
         <TextField id="standard-basic" label="Email-address" variant="standard" />
-        <TextField id="standard-password-input" type="password" label="Password" variant="standard" />
-        <TextField id="standard-password-input" type="password" label="Password(Confirm)" variant="standard" />
+        <TextField id="standard-password-input"
+        type="password"
+        label="Password"
+        variant="standard"
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <VisibilityOffIcon />
+              </InputAdornment>
+            ),
+          },
+        }} />
+        <TextField id="standard-password-input"
+        type="password"
+        label="Password(Confirm)"
+        variant="standard"
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <VisibilityOffIcon />
+              </InputAdornment>
+            )
+          }
+        }} />
       </div>
     </div>
   );
