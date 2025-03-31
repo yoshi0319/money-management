@@ -2,31 +2,33 @@
 
 import { Button, ButtonProps, InputAdornment, Link, styled, TextField, Typography } from "@mui/material";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+
+type Form = {
+  username: string;
+  firstName: string;
+  familyName: string;
+  emailAddress: string;
+  password: string;
+  passwordConfirm: string;
+}
 
 export default function Register() {
-  const [values, setValues] = useState({
-    username: "",
-    firstName: "",
-    familyName: "",
-    emailAddress: "",
-    password: "",
-    passwordConfirm: "",
-  });
+  const {
+    register,
+    getValues,
+    handleSubmit,
+    formState: {
+      errors,
+    }
+  } = useForm<Form>();
+
+  const onSubmit = (data: Form) => {
+    console.log(data);
+  }
+  
   const router = useRouter();
-
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setValues({
-      ...values,
-      [e.target.name]: e.target.value,
-    })
-  }
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    console.log(values);
-  }
 
   function goToLogin(e: React.MouseEvent<HTMLAnchorElement>) {
     e.preventDefault();
@@ -46,15 +48,52 @@ export default function Register() {
   return (
     <div className="flex justify-center items-center flex-col">
       <Typography variant="h2" className="pt-24 pb-14">Sign up</Typography>
-      <form className="flex flex-col gap-10 w-1/3" onSubmit={handleSubmit}>                                            {/* 6つあるフォームを囲っている */}
-        <TextField id="standard-basic" name="username" label="Username" variant="standard" value={values.username} onChange={handleInputChange} />
+      <form className="flex flex-col gap-10 w-1/3" onSubmit={handleSubmit(onSubmit)}>                                            {/* 6つあるフォームを囲っている */}
+        <TextField id="username" label="Username" variant="standard"
+          {...register("username", {
+            required: true,
+            maxLength: {
+              value: 32,
+              message: "32文字以内で入力してください"
+            }
+          }
+        )}
+        error={!!errors.username}
+        helperText={errors.username?.message}/>
         <div className="flex gap-10 w-full">
-          <TextField id="standard-basic" name="firstName" label="First-name" variant="standard" sx={{ width: "50%" }} value={values.firstName} onChange={handleInputChange}/>
-          <TextField id="standard-basic" name="familyName" label="Family-name" variant="standard" sx={{ width: "50%" }} value={values.familyName} onChange={handleInputChange}/>
+          <TextField id="firstName" label="First-name" variant="standard" sx={{ width: "50%" }}
+            {...register("firstName", {
+              required: true,
+              maxLength: {
+                value: 32,
+                message: "32文字以内で入力してください"
+              }
+            }
+          )}
+            error={!!errors.firstName}
+            helperText={errors.firstName?.message}/>
+          <TextField id="familyName" label="Family-name" variant="standard" sx={{ width: "50%" }}
+            {...register("familyName", {
+              required: true,
+              maxLength: {
+                value: 32,
+                message: "32文字以内で入力してください"
+              }
+            })}
+            error={!!errors.familyName}
+            helperText={errors.familyName?.message}/>
         </div>
-        <TextField id="standard-basic" name="emailAddress" label="Email-address" variant="standard" value={values.emailAddress} onChange={handleInputChange}/>
-        <TextField id="standard-password-input"
-        name="password"
+        <TextField id="emailAddress" label="Email-address" variant="standard"
+          {...register("emailAddress", {
+            required: true,
+            maxLength: {
+              value: 32,
+              message: "32文字以内で入力してください"
+            }
+          })}
+          error={!!errors.emailAddress}
+          helperText={errors.emailAddress?.message}/>
+        <TextField id="password"
         type="password"
         label="Password"
         variant="standard"
@@ -66,9 +105,21 @@ export default function Register() {
               </InputAdornment>
             ),
           },
-        }} value={values.password} onChange={handleInputChange}/>
-        <TextField id="standard-password-input"
-        name="passwordConfirm"
+        }}
+        {...register("password", {
+          required: true,
+          maxLength: {
+            value: 32,
+            message: "32文字以内で入力してください"
+          },
+          pattern: {
+            value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/,
+            message: "半角英大文字・小文字・数字をそれぞれ1文字以上含む8文字以上で入力してください"
+          }
+        })}
+        error={!!errors.password}
+        helperText={errors.password?.message}/>
+        <TextField id="passwordConfirm"
         type="password"
         label="Password(Confirm)"
         variant="standard"
@@ -80,7 +131,20 @@ export default function Register() {
               </InputAdornment>
             )
           }
-        }} value={values.passwordConfirm} onChange={handleInputChange}/>
+        }}
+        {...register("passwordConfirm", {
+          required: true,
+          maxLength: {
+            value: 32,
+            message: "32文字以内で入力してください"
+          },
+          validate: (data) => {
+            if (data !== getValues("password")) {
+              return "パスワードが一致しません";
+            }
+          }})}
+        error={!!errors.passwordConfirm}
+        helperText={errors.passwordConfirm?.message}/>
         <div className="flex justify-center w-full h-full pt-14">
           <ColorButton variant="contained" type="submit" size="small" className="w-64 h-12">Sign up</ColorButton>
         </div>
