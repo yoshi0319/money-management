@@ -6,7 +6,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Register() {
-
   const [values, setValues] = useState({
     username: "",
     firstName: "",
@@ -41,7 +40,7 @@ export default function Register() {
 
   return (
     <div className="flex justify-center items-center flex-col">
-      <Typography variant="h1" className="pt-48 pb-20">Sign up</Typography>
+      <Typography variant="h2" className="pt-24 pb-20">Sign up</Typography>
       <div className="flex flex-col gap-10 w-1/3">                                            {/* 6つあるフォームを囲っている */}
         <TextField id="standard-basic" label="Username" variant="standard"/>
         <div className="flex gap-10 w-full">
