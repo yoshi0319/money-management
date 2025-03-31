@@ -23,6 +23,11 @@ export default function Register() {
     })
   }
 
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    console.log(values);
+  }
+
   function goToLogin(e: React.MouseEvent<HTMLAnchorElement>) {
     e.preventDefault();
     router.push("/login");
@@ -40,15 +45,16 @@ export default function Register() {
 
   return (
     <div className="flex justify-center items-center flex-col">
-      <Typography variant="h2" className="pt-24 pb-20">Sign up</Typography>
-      <div className="flex flex-col gap-10 w-1/3">                                            {/* 6つあるフォームを囲っている */}
-        <TextField id="standard-basic" label="Username" variant="standard"/>
+      <Typography variant="h2" className="pt-24 pb-14">Sign up</Typography>
+      <form className="flex flex-col gap-10 w-1/3" onSubmit={handleSubmit}>                                            {/* 6つあるフォームを囲っている */}
+        <TextField id="standard-basic" name="username" label="Username" variant="standard" value={values.username} onChange={handleInputChange} />
         <div className="flex gap-10 w-full">
-          <TextField id="standard-basic" label="First-name" variant="standard" sx={{ width: "50%" }}/>
-          <TextField id="standard-basic" label="Family-name" variant="standard" sx={{ width: "50%" }}/>
+          <TextField id="standard-basic" name="firstName" label="First-name" variant="standard" sx={{ width: "50%" }} value={values.firstName} onChange={handleInputChange}/>
+          <TextField id="standard-basic" name="familyName" label="Family-name" variant="standard" sx={{ width: "50%" }} value={values.familyName} onChange={handleInputChange}/>
         </div>
-        <TextField id="standard-basic" label="Email-address" variant="standard" />
+        <TextField id="standard-basic" name="emailAddress" label="Email-address" variant="standard" value={values.emailAddress} onChange={handleInputChange}/>
         <TextField id="standard-password-input"
+        name="password"
         type="password"
         label="Password"
         variant="standard"
@@ -60,8 +66,9 @@ export default function Register() {
               </InputAdornment>
             ),
           },
-        }} />
+        }} value={values.password} onChange={handleInputChange}/>
         <TextField id="standard-password-input"
+        name="passwordConfirm"
         type="password"
         label="Password(Confirm)"
         variant="standard"
@@ -73,11 +80,11 @@ export default function Register() {
               </InputAdornment>
             )
           }
-        }} />
-      </div>
-      <div className="flex justify-center w-full h-full pt-20">
-        <ColorButton variant="contained" size="large" className="w-1/7 h-14">Sign up</ColorButton>
-      </div>
+        }} value={values.passwordConfirm} onChange={handleInputChange}/>
+        <div className="flex justify-center w-full h-full pt-14">
+          <ColorButton variant="contained" type="submit" size="small" className="w-64 h-12">Sign up</ColorButton>
+        </div>
+      </form>
       <div  className="flex flex-col justify-center items-center gap-1 pt-5 text-lg">
         <p>Already have an account?</p>
         <a href="/login" onClick={goToLogin} className="text-blue-500 hover:text-blue-700">Sign in</a>
