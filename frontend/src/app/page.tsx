@@ -46,7 +46,7 @@ export default function Register() {
 
 
   return (
-    <div className="flex justify-center items-center flex-col">
+    <main className="flex justify-center items-center flex-col">
       <Typography variant="h2" className="pt-24 pb-14">Sign up</Typography>
       <form className="flex flex-col gap-10 w-1/3" onSubmit={handleSubmit(onSubmit)}>                                            {/* 6つあるフォームを囲っている */}
         <TextField id="username" label="Username" variant="standard"
@@ -153,6 +153,6 @@ export default function Register() {
         <p>Already have an account?</p>
         <a href="/login" onClick={goToLogin} className="text-blue-500 hover:text-blue-700">Sign in</a>
       </div>
-    </div>
+    </main>
   );
 }
