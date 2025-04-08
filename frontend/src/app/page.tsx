@@ -4,6 +4,7 @@ import { Button, ButtonProps, InputAdornment, Link, styled, TextField, Typograph
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import SignPrompt from "./components/ui/Button/SignPrompt";
 
 type Form = {
   username: string;
@@ -150,8 +151,7 @@ export default function Register() {
         </div>
       </form>
       <div  className="flex flex-col justify-center items-center gap-1 pt-5 text-lg">
-        <p>Already have an account?</p>
-        <a href="/login" onClick={goToLogin} className="text-blue-500 hover:text-blue-700">Sign in</a>
+        <SignPrompt text="Already have an account?" linkText="Sign in" linkHref="/login" className="flex flex-col justify-center items-center" />
       </div>
     </main>
   );
