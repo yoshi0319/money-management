@@ -4,7 +4,7 @@ import { Button, ButtonProps, InputAdornment, Link, styled, TextField, Typograph
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import SignPrompt from "./components/ui/Button/SignPrompt";
+import SignPrompt from "./components/ui/Button/Auth/SignPrompt";
 
 type Form = {
   username: string;
