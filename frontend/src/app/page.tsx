@@ -4,7 +4,8 @@ import { Button, ButtonProps, InputAdornment, Link, styled, TextField, Typograph
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import SignPrompt from "./components/ui/Button/Auth/SignPrompt";
+import SignPrompt from "./components/ui/Button/Auth/Button/SignPrompt";
+import AuthInputField from "./components/ui/Button/Auth/Form/AuthInputField";
 
 type Form = {
   username: string;
@@ -49,31 +50,37 @@ export default function Register() {
   return (
     <main className="flex justify-center items-center flex-col">
       <Typography variant="h2" className="pt-24 pb-14">Sign up</Typography>
-      <form className="flex flex-col gap-10 w-1/3" onSubmit={handleSubmit(onSubmit)}>                                            {/* 6つあるフォームを囲っている */}
-        <TextField id="username" label="Username" variant="standard"
+      <form className="flex flex-col gap-15 w-1/3" onSubmit={handleSubmit(onSubmit)}>
+        <AuthInputField
+          text="User Name"
+          type="text"
           {...register("username", {
             required: true,
             maxLength: {
               value: 32,
               message: "32文字以内で入力してください"
-            }
-          }
-        )}
-        error={!!errors.username}
-        helperText={errors.username?.message}/>
+            },
+          })}
+          error={!!errors.username}
+          helperText={errors.username?.message}/>
         <div className="flex gap-10 w-full">
-          <TextField id="firstName" label="First-name" variant="standard" sx={{ width: "50%" }}
+          <AuthInputField
+            text="First Name"
+            type="text"
+            className="w-1/2"
             {...register("firstName", {
               required: true,
               maxLength: {
                 value: 32,
                 message: "32文字以内で入力してください"
               }
-            }
-          )}
+            })}
             error={!!errors.firstName}
             helperText={errors.firstName?.message}/>
-          <TextField id="familyName" label="Family-name" variant="standard" sx={{ width: "50%" }}
+          <AuthInputField
+            text="Family Name"
+            type="text"
+            className="w-1/2"
             {...register("familyName", {
               required: true,
               maxLength: {
@@ -84,7 +91,9 @@ export default function Register() {
             error={!!errors.familyName}
             helperText={errors.familyName?.message}/>
         </div>
-        <TextField id="emailAddress" label="Email-address" variant="standard"
+        <AuthInputField
+          text="Email Address"
+          type="email"
           {...register("emailAddress", {
             required: true,
             maxLength: {
@@ -94,58 +103,39 @@ export default function Register() {
           })}
           error={!!errors.emailAddress}
           helperText={errors.emailAddress?.message}/>
-        <TextField id="password"
-        type="password"
-        label="Password"
-        variant="standard"
-        slotProps={{
-          input: {
-            endAdornment: (
-              <InputAdornment position="end">
-                <VisibilityOffIcon />
-              </InputAdornment>
-            ),
-          },
-        }}
-        {...register("password", {
-          required: true,
-          maxLength: {
-            value: 32,
-            message: "32文字以内で入力してください"
-          },
-          pattern: {
-            value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/,
-            message: "半角英大文字・小文字・数字をそれぞれ1文字以上含む8文字以上で入力してください"
-          }
-        })}
-        error={!!errors.password}
-        helperText={errors.password?.message}/>
-        <TextField id="passwordConfirm"
-        type="password"
-        label="Password(Confirm)"
-        variant="standard"
-        slotProps={{
-          input: {
-            endAdornment: (
-              <InputAdornment position="end">
-                <VisibilityOffIcon />
-              </InputAdornment>
-            )
-          }
-        }}
-        {...register("passwordConfirm", {
-          required: true,
-          maxLength: {
-            value: 32,
-            message: "32文字以内で入力してください"
-          },
-          validate: (data) => {
-            if (data !== getValues("password")) {
-              return "パスワードが一致しません";
+        <AuthInputField
+          text="Password"
+          type="password"
+          {...register("password", {
+            required: true,
+            maxLength: {
+              value: 32,
+              message: "32文字以内で入力してください"
+            },
+            pattern: {
+              value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/,
+              message: "半角英大文字・小文字・数字をそれぞれ1文字以上含む8文字以上で入力してください"
             }
-          }})}
-        error={!!errors.passwordConfirm}
-        helperText={errors.passwordConfirm?.message}/>
+          })}
+          error={!!errors.password}
+          helperText={errors.password?.message}/>
+        <AuthInputField
+          text="Password (Confirm)"
+          type="password"
+          {...register("passwordConfirm", {
+            required: true,
+            maxLength: {
+              value: 32,
+              message: "32文字以内で入力してください"
+            },
+            validate: (data) => {
+              if (data !== getValues("password")) {
+                return "パスワードが一致しません";
+              }
+            }
+          })}
+          error={!!errors.passwordConfirm}
+          helperText={errors.passwordConfirm?.message}/>
         <div className="flex justify-center w-full h-full pt-14">
           <ColorButton variant="contained" type="submit" size="small" className="w-64 h-12">Sign up</ColorButton>
         </div>
