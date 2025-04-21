@@ -8,10 +8,10 @@ import SignPrompt from "./components/ui/Button/Auth/Button/SignPrompt";
 import AuthInputField from "./components/ui/Button/Auth/Form/AuthInputField";
 
 type Form = {
-  username: string;
-  firstName: string;
-  familyName: string;
-  emailAddress: string;
+  user_name: string;
+  first_name: string;
+  family_name: string;
+  email_address: string;
   password: string;
   passwordConfirm: string;
 }
@@ -26,15 +26,24 @@ export default function Register() {
     }
   } = useForm<Form>();
 
-  const onSubmit = (data: Form) => {
-    console.log(data);
-  }
-  
   const router = useRouter();
 
-  function goToLogin(e: React.MouseEvent<HTMLAnchorElement>) {
-    e.preventDefault();
-    router.push("/login");
+  const onSubmit = async (data: Form) => {
+    console.log(data);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      })
+      router.push("/login");
+      
+      
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
@@ -54,55 +63,55 @@ export default function Register() {
         <AuthInputField
           text="User Name"
           type="text"
-          {...register("username", {
+          {...register("user_name", {
             required: true,
             maxLength: {
               value: 32,
               message: "32文字以内で入力してください"
             },
           })}
-          error={!!errors.username}
-          helperText={errors.username?.message}/>
+          error={!!errors.user_name}
+          helperText={errors.user_name?.message}/>
         <div className="flex gap-10 w-full">
           <AuthInputField
             text="First Name"
             type="text"
             className="w-1/2"
-            {...register("firstName", {
+            {...register("first_name", {
               required: true,
               maxLength: {
                 value: 32,
                 message: "32文字以内で入力してください"
               }
             })}
-            error={!!errors.firstName}
-            helperText={errors.firstName?.message}/>
+            error={!!errors.first_name}
+            helperText={errors.first_name?.message}/>
           <AuthInputField
             text="Family Name"
             type="text"
             className="w-1/2"
-            {...register("familyName", {
+            {...register("family_name", {
               required: true,
               maxLength: {
                 value: 32,
                 message: "32文字以内で入力してください"
               }
             })}
-            error={!!errors.familyName}
-            helperText={errors.familyName?.message}/>
+            error={!!errors.family_name}
+            helperText={errors.family_name?.message}/>
         </div>
         <AuthInputField
           text="Email Address"
           type="email"
-          {...register("emailAddress", {
+          {...register("email_address", {
             required: true,
             maxLength: {
               value: 32,
               message: "32文字以内で入力してください"
             }
           })}
-          error={!!errors.emailAddress}
-          helperText={errors.emailAddress?.message}/>
+          error={!!errors.email_address}
+          helperText={errors.email_address?.message}/>
         <AuthInputField
           text="Password"
           type="password"
