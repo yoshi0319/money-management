@@ -8,7 +8,7 @@ from .serializers import (
     UserRegistrationSerializer,
 )
 from django.db import models, transaction
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -18,6 +18,12 @@ from rest_framework.response import Response
 class UserViewSet(viewsets.ModelViewSet):  # CRUD全て可能
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return UserRegistrationSerializer
+        return UserSerializer
 
 
 class MoneyViewSet(
@@ -107,12 +113,3 @@ class RecordViewSet(viewsets.ModelViewSet):  # CRUD全て可能
         Money.objects.filter(user_id=user).update(amount=new_total)
 
         instance.delete()
-
-
-@api_view(["POST"])
-def register_user(request):
-    serializer = UserRegistrationSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

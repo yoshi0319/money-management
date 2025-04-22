@@ -22,9 +22,9 @@ class CustomUserManager(BaseUserManager):
 
 class User(AbstractUser):
     username = None
-    USERNAME_FIELD = "email_address"  # 認証に使用するフィールドを指定
-    REQUIRED_FIELDS = ["user_name"]  # スーパーユーザー作成時に必要なフィールド
-    objects = CustomUserManager()  # カスタムマネージャーを追加
+    USERNAME_FIELD = "email_address"
+    REQUIRED_FIELDS = ["user_name"]
+    objects = CustomUserManager()
     first_name = models.CharField(max_length=32)
     family_name = models.CharField(max_length=32)
     user_name = models.CharField(max_length=32)
