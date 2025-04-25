@@ -40,7 +40,7 @@ export default function AuthInputField(props: AuthInputFieldProps) {
                     `}>
                 {text}
             </label>
-                {error && <p className="text-[#d32f2f] text-sm">{helperText}</p>}
+            {error && <p className="text-[#d32f2f] text-sm mt-1">{error}</p>}
         </div>
     )
 }
