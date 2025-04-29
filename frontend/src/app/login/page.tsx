@@ -28,16 +28,20 @@ export default function Login() {
 
     const onSubmit = async (data: LoginFormData) => {
         try {
-            const response = await fetch('/api/token', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/token/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify({
+                    username: data.username,
+                    password: data.password
+                }),
             });
 
             if (!response.ok) {
-                throw new Error('ログインに失敗しました');
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'ログインに失敗しました');
             }
 
             const result = await response.json();
@@ -45,9 +49,10 @@ export default function Login() {
             if (data.rememberMe) {
                 localStorage.setItem('rememberMe', 'true');
             }
-            router.push('/dashboard');
+            router.push('/(auth)/dashboard');
         } catch (error) {
-            console.log(error)
+            console.error('Login error:', error);
+            console.log(error instanceof Error ? error.message : 'ログインに失敗しました');
         }
     };
 
