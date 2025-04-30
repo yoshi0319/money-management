@@ -5,7 +5,7 @@ interface AuthInputFieldProps {
     error?: boolean;
     helperText?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export default function AuthInputField(props: AuthInputFieldProps) {
