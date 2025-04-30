@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     description: "無駄遣いをやめたい",
 };
 
-export default function LoginLayout({
+export default function DashboardLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
