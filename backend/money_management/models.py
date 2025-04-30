@@ -9,6 +9,7 @@ class CustomUserManager(BaseUserManager):
     def create_user(self, email_address, password=None, **extra_fields):
         if not email_address:
             raise ValueError("メールアドレスは必須です")
+        email_address = self.normalize_email(email_address)
         user = self.model(email_address=email_address, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)

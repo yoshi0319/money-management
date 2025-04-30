@@ -29,18 +29,32 @@ export default function Register() {
   const router = useRouter();
 
   const onSubmit = async (data: Form) => {
-    console.log(data);
+    const requestData = {
+      user_name: data.user_name,
+      first_name: data.first_name,
+      family_name: data.family_name,
+      email_address: data.email_address,
+      password: data.password,
+    };
+    console.log(requestData);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(requestData)
       })
-      router.push("/login");
-      
-      
+
+      if(!response.ok) {
+        const errorData = await response.json();
+        console.error("APIエラー:", errorData);
+        alert(JSON.stringify(errorData)); 
+        throw new Error(errorData.detail || "ユーザー登録に失敗しました");
+      }
+
+      router.push("/login");      
+
     } catch (error) {
       console.error(error);
     }
