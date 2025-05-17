@@ -1,10 +1,10 @@
 'use client'
 
 import { Button, ButtonProps, styled, Typography } from "@mui/material";
-import AuthInputField from "../components/ui/Button/Auth/Form/AuthInputField";
+import AuthInputField from "../../components/ui/Button/Auth/Form/AuthInputField";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import SignPrompt from "../components/ui/Button/Auth/Button/SignPrompt";
+import SignPrompt from "../../components/ui/Button/Auth/Button/SignPrompt";
 
 type LoginFormData = {
     user_name_or_email_address: string;

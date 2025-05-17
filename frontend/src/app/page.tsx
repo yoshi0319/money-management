@@ -163,7 +163,7 @@ export default function Register() {
         </div>
       </form>
       <div  className="flex flex-col justify-center items-center gap-1 pt-5 text-lg">
-        <SignPrompt text="Already have an account?" linkText="Sign in" linkHref="/login" className="flex flex-col justify-center items-center" />
+        <SignPrompt text="Already have an account?" linkText="Sign in" linkHref="/auth/login" className="flex flex-col justify-center items-center" />
       </div>
     </main>
   );
