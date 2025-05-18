@@ -52,7 +52,7 @@ export default function Login() {
                 localStorage.setItem('rememberMe', 'true');
             }
 
-            router.push('/(auth)/dashboard');
+            router.push('/dashboard');
         } catch (error) {
             console.error('Login error:', error);
             console.log(error instanceof Error ? error.message : 'ログインに失敗しました');
