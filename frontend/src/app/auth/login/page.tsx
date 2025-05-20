@@ -1,10 +1,11 @@
 'use client'
 
 import { Button, ButtonProps, styled, Typography } from "@mui/material";
-import AuthInputField from "../../components/ui/Button/Auth/Form/AuthInputField";
+import AuthInputField from "../../components/elements/Button/Auth/Form/AuthInputField";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import SignPrompt from "../../components/ui/Button/Auth/Button/SignPrompt";
+import SignPrompt from "../../components/elements/Button/Auth/Button/SignPrompt";
+import { useEffect } from "react";
 
 type LoginFormData = {
     user_name_or_email_address: string;
@@ -14,6 +15,13 @@ type LoginFormData = {
 
 export default function Login() {
     const router = useRouter();
+
+    useEffect(() => {
+        const rememberMe = localStorage.getItem("rememberMe") || false;
+        if(rememberMe) {
+            router.push("/dashboard");
+        }
+    }, [])
 
     const {
         register,

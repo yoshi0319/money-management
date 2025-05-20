@@ -1,47 +1,59 @@
 'use client'
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Header, { TabContext } from "../components/layouts/Header/Header";
+
+type User = {
+    id: number,
+    first_name: string,
+    family_name: string,
+    user_name: string,
+    email_address: string,
+    created_at: string
+}
 
 export default function Dashboard() {
-    type User = {
-        id: number,
-        first_name: string,
-        family_name: string,
-        user_name: string,
-        email_address: string,
-        created_at: string
-    }
-
+    const router = useRouter();
+    const [tabIndex, setTabIndex] = useState(0);
     const [user, setUser] = useState<User>();
 
     useEffect(() => {
         const fetchData = async () => {
             try {    
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    router.push('/login');
+                    return;
+                }
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/17`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${localStorage.getItem('token')}`
+                        "Authorization": `Bearer ${token}`
                     },
-                })
-                const data = await response.json();
-                if(!response.ok) {
-                    throw new Error("Failed to fetch data")
+                });
+                if (!response.ok) {
+                    throw new Error("Failed to fetch data");
                 }
+                const data = await response.json();
                 setUser(data);
             } catch (e) {
-                console.log("erroe", e);
+                console.error("Error fetching user data:", e);
+                router.push('/login');
             }
-            
-        }
+        };
         fetchData();
-    }, [])
+    }, [router]);
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen">
-            <p>dashboard</p>
-            <p>{user?.first_name}</p>
-            <p>{user?.family_name}</p>
-        </div>
+        <TabContext.Provider value={{ tabIndex, setTabIndex, user, setUser }}>
+            <div className="flex flex-col items-center justify-center min-h-screen">
+                <Header />
+                <div className="flex flex-col items-center justify-center flex-1 w-full">
+                    <p>dashboard</p>
+                </div>
+            </div>
+        </TabContext.Provider>
     );
 }

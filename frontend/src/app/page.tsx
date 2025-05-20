@@ -3,8 +3,8 @@
 import { Button, ButtonProps, styled, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import SignPrompt from "./components/ui/Button/Auth/Button/SignPrompt";
-import AuthInputField from "./components/ui/Button/Auth/Form/AuthInputField";
+import SignPrompt from "./components/elements/Button/Auth/Button/SignPrompt";
+import AuthInputField from "./components/elements/Button/Auth/Form/AuthInputField";
 
 type Form = {
   user_name: string;
