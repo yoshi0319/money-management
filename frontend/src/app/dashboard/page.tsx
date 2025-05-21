@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Header, { TabContext } from "../components/layouts/Header/Header";
+import { jwtDecode } from "jwt-decode";
 
 type User = {
     id: number,
@@ -11,6 +12,14 @@ type User = {
     user_name: string,
     email_address: string,
     created_at: string
+}
+
+type JwtPayload = {
+    token_type: string;
+    exp: number;
+    iat: number;
+    jti: string;
+    user_id: number;
 }
 
 export default function Dashboard() {
@@ -23,10 +32,20 @@ export default function Dashboard() {
             try {    
                 const token = localStorage.getItem('token');
                 if (!token) {
-                    router.push('/login');
+                    router.push('/auth/login');
                     return;
                 }
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/17`, {
+
+                const decodedToken = jwtDecode<JwtPayload>(token);
+                const userId = decodedToken.user_id;
+                
+                if (!userId) {
+                    console.error('ユーザーIDが見つかりませんでした');
+                    router.push('/auth/login');
+                    return;
+                }
+
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/${userId}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -34,13 +53,13 @@ export default function Dashboard() {
                     },
                 });
                 if (!response.ok) {
-                    throw new Error("Failed to fetch data");
+                    throw new Error("データの取得に失敗しました");
                 }
                 const data = await response.json();
                 setUser(data);
             } catch (e) {
-                console.error("Error fetching user data:", e);
-                router.push('/login');
+                console.error("エラーが発生しました:", e);
+                router.push('/auth/login');
             }
         };
         fetchData();
@@ -51,7 +70,6 @@ export default function Dashboard() {
             <div className="flex flex-col items-center justify-center min-h-screen">
                 <Header />
                 <div className="flex flex-col items-center justify-center flex-1 w-full">
-                    <p>dashboard</p>
                 </div>
             </div>
         </TabContext.Provider>

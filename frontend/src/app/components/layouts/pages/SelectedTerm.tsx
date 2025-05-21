@@ -1,7 +1,5 @@
-export default function SelectedTerm() {
+export default function SelectedTerm() {    
     return (
-        <div>
-            かきくけこ
-        </div>
+        <p>test</p>
     );
 }
