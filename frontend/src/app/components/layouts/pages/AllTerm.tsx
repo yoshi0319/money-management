@@ -1,27 +1,33 @@
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import React, { useEffect, useState } from "react";
-import dayjs, { Dayjs } from "dayjs";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import Image from "next/image";
 
 export default function AllTerm() {
-    useEffect(() => {
-        const date = new Date();
-        setDate(dayjs(date));
-    }, [])
+    const today = new Date();
+    const [date, setDate] = useState(today);
 
-    const [date, setDate] = useState<Dayjs | null>(dayjs("2000/01/01"));
+    const getInputTextForDate = (date: Date) => setDate(date);
     
     return (
         <div className="flex flex-col items-center justify-center pt-5">
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                    value={date}
-                    onChange={(newValue: Dayjs | null) => {
-                        setDate(newValue);
-                    }}
+            <label className="relative w-full max-w-md cursor-pointer">
+                <DatePicker
+                    dateFormat="yyyy/MM/dd"
+                    selected={date}
+                    onChange={(date: Date | null) => date && setDate(date)}
+                    className="w-full text-left border-2 border-gray-300 rounded-md px-4 py-3 pr-10"
+                />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <Image
+                        src="/icons/calendar.svg"
+                        alt="calendar"
+                        width={18}
+                        height={20}
                     />
-            </LocalizationProvider>
+                </div>
+            </label>
+            <p>test</p>
         </div>
     );
 }

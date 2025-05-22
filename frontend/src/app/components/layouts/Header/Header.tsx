@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, Dispatch, SetStateAction, useContext } from "react";
 import Contents from "../pages/Contents";
 
 type User = {
@@ -12,9 +12,9 @@ type User = {
 
 type TabContextType = {
     tabIndex: number;
-    setTabIndex: React.Dispatch<React.SetStateAction<number>>;
+    setTabIndex: Dispatch<SetStateAction<number>>;
     user: User | undefined;
-    setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
+    setUser: Dispatch<SetStateAction<User | undefined>>;
 }
 
 const defaultContext: TabContextType = {

@@ -26,8 +26,8 @@ export default function Menu() {
                     onClick={() =>setTabIndex(0)} 
                     className={`cursor-pointer px-24 py-2 relative ${
                         tabIndex === 0 
-                        ? "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-500" 
-                        : ""
+                        ? "text-blue-500 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-500" 
+                        : "text-gray-500"
                     }`}
                 >
                     全て
@@ -36,8 +36,8 @@ export default function Menu() {
                     onClick={() =>setTabIndex(1)} 
                     className={`cursor-pointer px-24 py-2 relative ${
                         tabIndex === 1 
-                        ? "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-500" 
-                        : ""
+                        ? "text-blue-500 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-500" 
+                        : "text-gray-500"
                     }`}
                 >
                     期間選択
@@ -52,7 +52,7 @@ export default function Menu() {
                     </label>
                     <div className="cursor-pointer">
                         <Image
-                            src="/settings.svg"
+                            src="/icons/settings.svg"
                             alt="設定"
                             width={20}
                             height={20}
