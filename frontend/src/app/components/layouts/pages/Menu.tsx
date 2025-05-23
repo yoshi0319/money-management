@@ -30,7 +30,7 @@ export default function Menu() {
                         : "text-gray-500"
                     }`}
                 >
-                    全て
+                    今日 / 各日
                 </div>
                 <div 
                     onClick={() =>setTabIndex(1)} 
