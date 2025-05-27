@@ -50,10 +50,19 @@ class RecordViewSet(viewsets.ModelViewSet):  # CRUD全て可能
 
     def get_queryset(self):
         user_id = self.request.query_params.get("user_id")
-        queryset = Record.objects.all()
+        start_date = self.request.query_params.get("start_date")
+        end_date = self.request.query_params.get("end_date")
+        queryset = Record.objects.filter(user_id=self.request.user)
 
-        if user_id:
-            queryset = queryset.filter(user_id=user_id)
+        if (
+            user_id and self.request.user.is_staff
+        ):  # 管理者のみが他のユーザーのレコードを閲覧可能
+            queryset = Record.objects.filter(user_id=user_id)
+
+        if start_date:
+            queryset = queryset.filter(date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(date__lte=end_date)
 
         return queryset
 

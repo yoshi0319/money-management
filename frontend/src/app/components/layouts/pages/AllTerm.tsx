@@ -2,6 +2,7 @@ import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Image from "next/image";
+import Graph from "../graph/Graph";
 
 export default function AllTerm() {
     const today = new Date();
@@ -10,7 +11,7 @@ export default function AllTerm() {
     const getInputTextForDate = (date: Date) => setDate(date);
     
     return (
-        <div className="flex flex-col items-center justify-center pt-5">
+        <div className="flex flex-col items-center justify-center pt-7">
             <label className="relative w-full max-w-md cursor-pointer">
                 <DatePicker
                     dateFormat="yyyy/MM/dd"
@@ -27,7 +28,7 @@ export default function AllTerm() {
                     />
                 </div>
             </label>
-            <p>test2</p>
+            <Graph dateRange={[date, date]} />
         </div>
     );
 }

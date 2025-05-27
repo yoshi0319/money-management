@@ -64,6 +64,7 @@ export default function Login() {
         } catch (error) {
             console.error('Login error:', error);
             console.log(error instanceof Error ? error.message : 'ログインに失敗しました');
+            console.log(requestData);
         }
     };
 

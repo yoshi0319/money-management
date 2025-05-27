@@ -84,7 +84,6 @@ class Record(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        # 合計を自動計算
         total = (
             Record.objects.filter(user_id=self.user_id)
             .exclude(record_id=self.record_id)
@@ -93,7 +92,6 @@ class Record(models.Model):
         )
         self.amount = total + self.recorded_money
 
-        # Moneyテーブルも更新
         Money.objects.filter(user_id=self.user_id).update(amount=self.amount)
 
         super().save(*args, **kwargs)

@@ -2,6 +2,7 @@ import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Image from "next/image";
+import Graph from "../graph/Graph";
 
 export default function SelectedTerm() {
     const today = new Date();
@@ -15,9 +16,9 @@ export default function SelectedTerm() {
     const [start, end] = dateRange;  
     
     return (
-        <div className="flex flex-col items-center justify-center pt-5">
+        <div className="flex flex-col items-center justify-center pt-7">
             <div className="flex gap-2 w-full max-w-md">
-                <div className="relative flex-1">
+                <label className="relative flex-1 cursor-pointer">
                     <DatePicker
                         selected={start}
                         onChange={(date) => setDateRange([date, end])}
@@ -32,9 +33,9 @@ export default function SelectedTerm() {
                             height={20}
                         />
                     </div>
-                </div>
+                </label>
                 <span className="flex items-center">-</span>
-                <div className="relative flex-1">
+                <label className="relative flex-1 cursor-pointer">
                     <DatePicker
                         selected={end}
                         onChange={(date) => setDateRange([start, date])}
@@ -49,9 +50,9 @@ export default function SelectedTerm() {
                             height={20}
                         />
                     </div>
-                </div>
+                </label>
             </div>
-            <p>test2</p>
+            <Graph dateRange={dateRange}/>
         </div>
     );
 }

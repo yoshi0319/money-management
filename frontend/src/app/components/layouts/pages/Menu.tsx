@@ -16,7 +16,7 @@ export default function Menu() {
   }
 
   return (
-    <div className="w-full h-16 bg-white border-b border-[#E2E8F0]">
+    <div className="w-full h-16 bg-white border-b border-[#E2E8F0] shadow-md">
         <div className="flex flex-row justify-between items-center w-full h-full px-4">
 
             <div className="w-1/4"></div>
