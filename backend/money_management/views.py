@@ -52,6 +52,8 @@ class RecordViewSet(viewsets.ModelViewSet):  # CRUD全て可能
         user_id = self.request.query_params.get("user_id")
         start_date = self.request.query_params.get("start_date")
         end_date = self.request.query_params.get("end_date")
+        sort = self.request.query_params.get("sort")
+        order = self.request.query_params.get("order")
         queryset = Record.objects.filter(user_id=self.request.user)
 
         if (
@@ -63,6 +65,10 @@ class RecordViewSet(viewsets.ModelViewSet):  # CRUD全て可能
             queryset = queryset.filter(date__gte=start_date)
         if end_date:
             queryset = queryset.filter(date__lte=end_date)
+        if sort:
+            if order == "desc":
+                sort = f"-{sort}"
+            queryset = queryset.order_by(sort)
 
         return queryset
 

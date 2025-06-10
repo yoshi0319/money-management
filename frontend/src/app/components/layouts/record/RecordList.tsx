@@ -28,7 +28,7 @@ export default function RecordList() {
                 if (!user) {
                     return;
                 }
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/?user_id=${user.id}`, {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/?user_id=${user.id}&sort=record_id&order=desc`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -40,6 +40,7 @@ export default function RecordList() {
                 }
                 const data = await response.json();
                 setRecords(data);
+                console.log(data);
             } catch (e) {
                 console.error("データの取得に失敗しました:", e);
             }
@@ -62,7 +63,7 @@ export default function RecordList() {
                 user_id: user.id,
                 date: new Date().toISOString().split('T')[0],
                 method: "food",
-                recorded_money: 3000,
+                recorded_money: -10000,
             };
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/?user_id=${user.id}`, {
@@ -83,7 +84,7 @@ export default function RecordList() {
             const data = await response.json();
             console.log('Success response:', data);
 
-            const updatedResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/?user_id=${user.id}`, {
+            const updatedResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/?user_id=${user.id}&sort=record_id&order=desc`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
