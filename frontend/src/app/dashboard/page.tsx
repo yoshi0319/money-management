@@ -67,10 +67,8 @@ export default function Dashboard() {
 
     return (
         <TabContext.Provider value={{ tabIndex, setTabIndex, user, setUser }}>
-            <div className="flex flex-col items-center justify-center min-h-screen">
+            <div className="flex flex-col min-h-screen">
                 <Header />
-                <div className="flex flex-col items-center justify-center flex-1 w-full">
-                </div>
             </div>
         </TabContext.Provider>
     );

@@ -3,6 +3,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Image from "next/image";
 import Graph from "../graph/Graph";
+import RecordList from "../record/RecordList";
 
 export default function AllTerm() {
     const today = new Date();
@@ -29,6 +30,9 @@ export default function AllTerm() {
                 </div>
             </label>
             <Graph dateRange={[date, date]} />
+            <div className="flex justify-center items-center w-full h-full pt-20">
+                <RecordList />
+            </div>
         </div>
     );
 }
