@@ -21,7 +21,7 @@ export default function Login() {
         if(rememberMe) {
             router.push("/dashboard");
         }
-    }, [])
+    }, [router])
 
     const {
         register,

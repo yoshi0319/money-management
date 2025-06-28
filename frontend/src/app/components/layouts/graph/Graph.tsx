@@ -11,6 +11,23 @@ type GraphProps = {
     dateRange?: [Date | null, Date | null];
 }
 
+type Record = {
+    method_display: string;
+    recorded_money: number;
+}
+
+type LegendPayload = {
+    value: string;
+    color: string;
+    payload: {
+        value: number;
+    };
+}
+
+type CustomLegendProps = {
+    payload?: LegendPayload[];
+}
+
 export default function Graph({ dateRange }: GraphProps) {
     const router = useRouter();
     const { user } = useContext(TabContext);
@@ -63,7 +80,7 @@ export default function Graph({ dateRange }: GraphProps) {
                 
                 const data = await response.json();
                 
-                const methodTotals = data.reduce((acc: { [key: string]: number }, record: any) => {
+                const methodTotals = data.reduce((acc: { [key: string]: number }, record: Record) => {
                     const method = record.method_display;
                     acc[method] = (acc[method] || 0) + record.recorded_money;
                     return acc;
@@ -84,7 +101,7 @@ export default function Graph({ dateRange }: GraphProps) {
             }
         }
         fetchData();
-    }, [user, dateRange]);
+    }, [user, dateRange, router]);
 
     const DynamicPieChart = dynamic(
         () => Promise.resolve(PieChart),
@@ -107,10 +124,12 @@ export default function Graph({ dateRange }: GraphProps) {
         );
     };
 
-    const CustomLegend = ({ payload }: any) => {
+    const CustomLegend = ({ payload }: CustomLegendProps) => {
+        if (!payload) return null;
+        
         return (
             <ul className="list-none">
-                {payload.map((entry: any, index: number) => (
+                {payload.map((entry: LegendPayload, index: number) => (
                     <li key={`item-${index}`} className="flex items-center justify-between mb-2">
                         <div className="flex items-center">
                             <div
