@@ -16,6 +16,8 @@ export default function RecordList() {
     const router = useRouter();
     const {user} = useContext(TabContext);
     const [records, setRecords] = useState<Record[]>([]);
+    const [addMenu_open, setAddMenu_open] = useState(false);
+    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -48,7 +50,43 @@ export default function RecordList() {
         fetchData();
     }, [user, router]);
 
-    const handleAdd = async () => {
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && addMenu_open) {
+                setAddMenu_open(false);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [addMenu_open]);
+
+    const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.currentTarget);
+        const method = formData.get('method') as string;
+        const recorded_money = formData.get('recorded_money') as string;
+        
+        if (!method || method === '') {
+            alert('methodを選択してください');
+            return;
+        }
+        
+        if (!recorded_money || recorded_money.trim() === '') {
+            alert('in / outを入力してください');
+            return;
+        }
+        
+        const moneyValue = parseFloat(recorded_money);
+        if (isNaN(moneyValue)) {
+            alert('in / outは数値で入力してください');
+            return;
+        }
+        
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -61,9 +99,9 @@ export default function RecordList() {
 
             const newRecord = {
                 user_id: user.id,
-                date: new Date().toISOString().split('T')[0],
-                method: "food",
-                recorded_money: -10000,
+                date: date,
+                method: method,
+                recorded_money: moneyValue,
             };
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/?user_id=${user.id}`, {
@@ -98,6 +136,8 @@ export default function RecordList() {
 
             const updatedData = await updatedResponse.json();
             setRecords(updatedData);
+            
+            setAddMenu_open(false);
         } catch (e) {
             console.error("エラーが発生しました。: ", e);
         }
@@ -115,7 +155,7 @@ export default function RecordList() {
                         <th className="w-1/5 pb-2 text-center">
                             <button 
                                 className="bg-blue-400 text-white rounded-md px-4 py-1 cursor-pointer hover:bg-blue-300"
-                                onClick={handleAdd}
+                                onClick={() => setAddMenu_open(!addMenu_open)}
                             >
                                 ADD
                             </button>
@@ -136,6 +176,45 @@ export default function RecordList() {
                     ))}
                 </tbody>
             </table>
+            {addMenu_open && (
+                <div className="fixed bg-black/20 w-full h-full top-0 left-0 z-10">
+                    <div className="fixed bg-white border-1 rounded-md border-[#E2E8F0] shadow-md w-1/3 h-1/3 top-1/3 left-1/3">
+                        <button className="relative bg-[#DEDEDE] text-black font-normal rounded-md border-1 border-[#C2C2C2] px-2 py-1 cursor-pointer hover:bg-[#A2A2A2] top-5 left-5" onClick={() => setAddMenu_open(false)}>
+                            &lt; go back
+                        </button>
+                        <form className="w-full h-full flex flex-col justify-center items-center" onSubmit={handleAdd}>
+                            <table className="w-full max-w-md">
+                                <tbody>
+                                    <tr>
+                                        <th className="py-4 text-left">date</th>
+                                        <th className="py-4 text-center">{date}</th>
+                                    </tr>
+                                    <tr>
+                                        <th className="py-4 text-left">method</th>
+                                        <th className="py-4 text-center"><select name="method" id="method" className="border-1 border-gray-400 rounded-md px-2 py-1 w-54">
+                                            <option value="">--選択してください--</option>
+                                            <option value="convenience_store">コンビニ</option>
+                                            <option value="food">飲食店</option>
+                                            <option value="supermarket">スーパー</option>
+                                            <option value="cafe">カフェ</option>
+                                            <option value="other">その他</option>
+                                        </select></th>
+                                    </tr>
+                                    <tr>
+                                        <th className="py-4 text-left">in / out</th>
+                                        <th className="py-4 text-center"><input type="text" name="recorded_money" placeholder="0" className="border-1 border-gray-400 rounded-md px-2 py-1 w-54"/></th>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div className="flex justify-center">
+                                <button type="submit" className="bg-[#3AA0FF] text-white font-normal rounded-md border-1 border-[#C2C2C2] px-10 py-1 cursor-pointer hover:bg-[#A2A2A2]">
+                                    ADD
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
