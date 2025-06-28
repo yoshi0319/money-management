@@ -3,8 +3,8 @@
 import { Button, ButtonProps, styled, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import SignPrompt from "./components/ui/Button/Auth/Button/SignPrompt";
-import AuthInputField from "./components/ui/Button/Auth/Form/AuthInputField";
+import SignPrompt from "./components/elements/Button/Auth/Button/SignPrompt";
+import AuthInputField from "./components/elements/Button/Auth/Form/AuthInputField";
 
 type Form = {
   user_name: string;
@@ -52,7 +52,7 @@ export default function Register() {
         throw new Error(errorData.detail || "ユーザー登録に失敗しました");
       }
 
-      router.push("/login");      
+      router.push("/auth/login");      
 
     } catch (error) {
       console.error(error);
@@ -163,7 +163,7 @@ export default function Register() {
         </div>
       </form>
       <div  className="flex flex-col justify-center items-center gap-1 pt-5 text-lg">
-        <SignPrompt text="Already have an account?" linkText="Sign in" linkHref="/login" className="flex flex-col justify-center items-center" />
+        <SignPrompt text="Already have an account?" linkText="Sign in" linkHref="/auth/login" className="flex flex-col justify-center items-center" />
       </div>
     </main>
   );
