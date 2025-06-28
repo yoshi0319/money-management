@@ -5,9 +5,7 @@ import { useEffect, useContext, useState } from 'react';
 import { Cell, Legend, Pie, PieChart, Tooltip, Text } from "recharts";
 import { TabContext } from '../Header/Header';
 import { useRouter } from 'next/navigation';
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import Image from "next/image";
+
 
 type GraphProps = {
     dateRange?: [Date | null, Date | null];

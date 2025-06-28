@@ -6,10 +6,7 @@ import Graph from "../graph/Graph";
 import RecordList from "../record/RecordList";
 
 export default function AllTerm() {
-    const today = new Date();
-    const [date, setDate] = useState(today);
-
-    const getInputTextForDate = (date: Date) => setDate(date);
+    const [date, setDate] = useState(new Date());
     
     return (
         <div className="flex flex-col items-center justify-center pt-7">

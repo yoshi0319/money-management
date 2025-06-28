@@ -17,7 +17,7 @@ export default function RecordList() {
     const {user} = useContext(TabContext);
     const [records, setRecords] = useState<Record[]>([]);
     const [addMenu_open, setAddMenu_open] = useState(false);
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const date = new Date().toISOString().split('T')[0];
 
     useEffect(() => {
         const fetchData = async () => {
