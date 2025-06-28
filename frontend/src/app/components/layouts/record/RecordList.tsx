@@ -207,7 +207,7 @@ export default function RecordList() {
                                 </tbody>
                             </table>
                             <div className="flex justify-center">
-                                <button type="submit" className="bg-[#3AA0FF] text-white font-normal rounded-md border-1 border-[#C2C2C2] px-10 py-1 cursor-pointer hover:bg-[#A2A2A2]">
+                                <button type="submit" className="bg-[#3AA0FF] text-white font-normal rounded-md border-1 border-[#C2C2C2] px-10 py-1 cursor-pointer hover:bg-[#0084FF]">
                                     ADD
                                 </button>
                             </div>

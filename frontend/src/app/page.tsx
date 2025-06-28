@@ -52,7 +52,7 @@ export default function Register() {
         throw new Error(errorData.detail || "ユーザー登録に失敗しました");
       }
 
-      router.push("/login");      
+      router.push("/auth/login");      
 
     } catch (error) {
       console.error(error);
