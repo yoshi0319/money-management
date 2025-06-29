@@ -156,7 +156,15 @@ AUTH_USER_MODEL = "money_management.User"
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = os.environ.get("TRUSTED_ORIGINS").split(" ")
+# CORS設定を修正（一時的にコメントアウト）
+# cors_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "")
+# CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
+
+# Vercelのドメイン全体を許可（URLが頻繁に変わるため）
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"https://money-management-.*-yoshi0319s-projects\.vercel\.app",
+    r"https://money-management-.*\.vercel\.app",
+]
 
 CORS_PREFLIGHT_MAX_AGE = 60 * 30
 
