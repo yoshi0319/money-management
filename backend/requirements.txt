@@ -1,0 +1,35 @@
+# Django フレームワーク
+Django==5.1.3
+
+# Django REST Framework
+djangorestframework==3.15.2
+
+# JWT認証
+djangorestframework-simplejwt==5.3.1
+
+# CORS設定
+django-cors-headers==4.3.1
+
+# 環境変数管理
+django-environ==0.11.2
+
+# データベース（PostgreSQL推奨）
+psycopg2-binary==2.9.9
+
+# 本番環境用WSGIサーバー
+gunicorn==21.2.0
+
+# 静的ファイル配信
+whitenoise==6.6.0
+
+# セキュリティヘッダー
+django-csp==3.7
+
+# ログ管理
+python-json-logger==2.0.7
+
+# 日付・時刻処理
+python-dateutil==2.8.2
+
+# 開発用（本番環境では不要）
+# django-debug-toolbar==4.2.0 
