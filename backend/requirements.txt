@@ -16,6 +16,9 @@ django-environ==0.11.2
 # データベース（PostgreSQL推奨）
 psycopg[binary]==3.1.18
 
+# データベースURL解析
+dj-database-url==2.1.0
+
 # 本番環境用WSGIサーバー
 gunicorn==21.2.0
 
