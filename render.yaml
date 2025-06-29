@@ -2,7 +2,7 @@ services:
   - type: web
     name: money-management-backend
     runtime: python
-    buildCommand: "cd backend && pip install -r requirements.txt"
+    buildCommand: "cd backend && pip install -r requirements.txt && python manage.py migrate"
     startCommand: "cd backend && gunicorn my_project.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
@@ -36,7 +36,7 @@ services:
           name: money-management-db
           property: port
       - key: TRUSTED_ORIGINS
-        value: "https://money-management-p4h2hjohh-yoshi0319s-projects.vercel.app"
+        value: "https://money-management-19q82b9qz-yoshi0319s-projects.vercel.app"
 
 databases:
   - name: money-management-db
