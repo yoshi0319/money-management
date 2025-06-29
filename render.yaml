@@ -2,7 +2,7 @@ services:
   - type: web
     name: money-management-backend
     runtime: python
-    buildCommand: "cd backend && pip install -r requirements.txt && python manage.py makemigrations --noinput && python manage.py migrate --noinput"
+    buildCommand: "cd backend && pip install -r requirements.txt && python manage.py makemigrations --noinput && python manage.py migrate --noinput --run-syncdb && python manage.py collectstatic --noinput"
     startCommand: "cd backend && gunicorn my_project.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
