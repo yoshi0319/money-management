@@ -14,7 +14,7 @@ django-cors-headers==4.3.1
 django-environ==0.11.2
 
 # データベース（PostgreSQL推奨）
-psycopg2==2.9.9
+psycopg2-binary==2.9.9
 
 # 本番環境用WSGIサーバー
 gunicorn==21.2.0
