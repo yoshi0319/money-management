@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+echo "=== Starting application ==="
+echo "Current directory: $(pwd)"
+echo "FORCE_MIGRATE: $FORCE_MIGRATE"
+echo "DATABASE_URL: $DATABASE_URL"
+
 echo "Waiting for database to be ready..."
 sleep 5
 
@@ -30,5 +35,5 @@ else:
     print('Superuser already exists')
 " || echo "Superuser creation skipped"
 
-echo "Starting application..."
+echo "Starting gunicorn..."
 exec gunicorn my_project.wsgi:application --bind 0.0.0.0:$PORT 
