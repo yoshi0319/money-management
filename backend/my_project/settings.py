@@ -86,29 +86,22 @@ WSGI_APPLICATION = "my_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# 本番環境ではDATABASE_URL、ローカルでは個別の環境変数を使用
-if DEBUG:
-    # ローカル開発環境
+# Database
+# DATABASE_URLがあればそれを優先、なければ.envの個別指定
+if os.environ.get("DATABASE_URL"):
     DATABASES = {
-        "default": {
-            "ENGINE": env("DB_ENGINE", default="django.db.backends.sqlite3"),
-            "NAME": env("DB_NAME", default=os.path.join(BASE_DIR, "db.sqlite3")),
-            "USER": env("DB_USER", default=""),
-            "PASSWORD": env("DB_PASSWORD", default=""),
-            "HOST": env("DB_HOST", default=""),
-            "PORT": env("DB_PORT", default=""),
-        }
+        "default": dj_database_url.config(conn_max_age=600, conn_health_checks=True)
     }
 else:
-    # 本番環境
-    import dj_database_url
-
     DATABASES = {
-        "default": dj_database_url.config(
-            default=env("DATABASE_URL"),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+        "default": {
+            "ENGINE": env("DB_ENGINE"),
+            "NAME": env("DB_NAME"),
+            "USER": env("DB_USER"),
+            "PASSWORD": env("DB_PASSWORD"),
+            "HOST": env("DB_HOST"),
+            "PORT": env("DB_PORT"),
+        }
     }
 
 
@@ -171,19 +164,21 @@ AUTH_USER_MODEL = "money_management.User"
 
 CORS_ALLOW_CREDENTIALS = True
 
-# CORS設定を修正
+# CORS_ALLOWED_ORIGINS
+cors_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "")
+CORS_ALLOWED_ORIGINS = [o for o in cors_origins.split() if o]
+
+# 開発環境ではCORSを一時的に無効化（デバッグ用）
 if DEBUG:
-    # ローカル開発環境
-    cors_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "")
-    CORS_ALLOWED_ORIGINS = [
-        origin.strip() for origin in cors_origins.split(",") if origin.strip()
-    ]
-else:
-    # 本番環境（Vercelのドメイン全体を許可）
-    CORS_ALLOWED_ORIGIN_REGEXES = [
-        r"https://money-management-.*-yoshi0319s-projects\.vercel\.app",
-        r"https://money-management-.*\.vercel\.app",
-    ]
+    CORS_ALLOW_ALL_ORIGINS = True
+    print(f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}")
+    print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
+
+# Vercelのドメイン全体を許可（URLが頻繁に変わるため）
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"https://money-management-.*-yoshi0319s-projects\.vercel\.app",
+    r"https://money-management-.*\.vercel\.app",
+]
 
 CORS_PREFLIGHT_MAX_AGE = 60 * 30
 
@@ -203,87 +198,22 @@ if not DEBUG:
     import subprocess
     import sys
     import os
-    import time
 
-    def run_migrations():
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                print(f"Migration attempt {attempt + 1}/{max_retries}")
-                # メモリ使用量を削減するためのオプションを追加
-                result = subprocess.run(
-                    [
-                        sys.executable,
-                        "manage.py",
-                        "migrate",
-                        "--noinput",
-                        "--run-syncdb",
-                    ],
-                    cwd=BASE_DIR,
-                    capture_output=True,
-                    text=True,
-                    timeout=120,
-                    env={**os.environ, "PYTHONOPTIMIZE": "1"},
-                )
-
-                if result.returncode == 0:
-                    print("Migration completed successfully")
-                    print("Migration output:", result.stdout)
-                    return True
-                else:
-                    print(f"Migration failed (attempt {attempt + 1}):")
-                    print("STDOUT:", result.stdout)
-                    print("STDERR:", result.stderr)
-
-                    if attempt < max_retries - 1:
-                        print(f"Retrying in 10 seconds...")
-                        time.sleep(10)
-
-            except Exception as e:
-                print(f"Migration error (attempt {attempt + 1}): {e}")
-                if attempt < max_retries - 1:
-                    print(f"Retrying in 10 seconds...")
-                    time.sleep(10)
-
-        print("All migration attempts failed")
-        return False
-
-    # アプリケーション起動時にマイグレーションを実行
     try:
-        run_migrations()
+        # マイグレーションを実行
+        result = subprocess.run(
+            [sys.executable, "manage.py", "migrate", "--noinput"],
+            cwd=BASE_DIR,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+
+        # ログに出力（デバッグ用）
+        print("Migration output:", result.stdout)
+        if result.stderr:
+            print("Migration errors:", result.stderr)
+
     except Exception as e:
-        print(f"Migration execution failed: {e}")
-        pass  # マイグレーションエラーを無視してアプリケーションを起動
-
-# メモリ使用量を削減するための設定
-if not DEBUG:
-    # セッション設定を最適化
-    SESSION_ENGINE = "django.contrib.sessions.backends.db"
-    SESSION_SAVE_EVERY_REQUEST = False
-
-    # キャッシュ設定
-    CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-            "LOCATION": "unique-snowflake",
-            "TIMEOUT": 300,
-            "OPTIONS": {
-                "MAX_ENTRIES": 100,
-            },
-        }
-    }
-
-    # ログ設定を最適化
-    LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-            },
-        },
-        "root": {
-            "handlers": ["console"],
-            "level": "WARNING",
-        },
-    }
+        print(f"Migration failed: {e}")
+        pass  # マイグレーションエラーを無視
