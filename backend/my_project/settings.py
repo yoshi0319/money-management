@@ -31,7 +31,7 @@ env.read_env(os.path.join(BASE_DIR, ".env"))
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env("DEBUG")
+DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(" ")
 
@@ -86,13 +86,30 @@ WSGI_APPLICATION = "my_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default=env("DATABASE_URL", default="sqlite:///db.sqlite3"),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+# 本番環境ではDATABASE_URL、ローカルでは個別の環境変数を使用
+if DEBUG:
+    # ローカル開発環境
+    DATABASES = {
+        "default": {
+            "ENGINE": env("DB_ENGINE", default="django.db.backends.sqlite3"),
+            "NAME": env("DB_NAME", default=os.path.join(BASE_DIR, "db.sqlite3")),
+            "USER": env("DB_USER", default=""),
+            "PASSWORD": env("DB_PASSWORD", default=""),
+            "HOST": env("DB_HOST", default=""),
+            "PORT": env("DB_PORT", default=""),
+        }
+    }
+else:
+    # 本番環境
+    import dj_database_url
+
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=env("DATABASE_URL"),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
 
 
 # Password validation
@@ -154,15 +171,19 @@ AUTH_USER_MODEL = "money_management.User"
 
 CORS_ALLOW_CREDENTIALS = True
 
-# CORS設定を修正（一時的にコメントアウト）
-# cors_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "")
-# CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
-
-# Vercelのドメイン全体を許可（URLが頻繁に変わるため）
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"https://money-management-.*-yoshi0319s-projects\.vercel\.app",
-    r"https://money-management-.*\.vercel\.app",
-]
+# CORS設定を修正
+if DEBUG:
+    # ローカル開発環境
+    cors_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "")
+    CORS_ALLOWED_ORIGINS = [
+        origin.strip() for origin in cors_origins.split(",") if origin.strip()
+    ]
+else:
+    # 本番環境（Vercelのドメイン全体を許可）
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r"https://money-management-.*-yoshi0319s-projects\.vercel\.app",
+        r"https://money-management-.*\.vercel\.app",
+    ]
 
 CORS_PREFLIGHT_MAX_AGE = 60 * 30
 
