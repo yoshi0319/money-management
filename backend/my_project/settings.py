@@ -176,3 +176,18 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+# 本番環境でマイグレーションを自動実行
+if not DEBUG:
+    import subprocess
+    import sys
+
+    try:
+        subprocess.run(
+            [sys.executable, "manage.py", "migrate", "--noinput"],
+            cwd=BASE_DIR,
+            check=True,
+            capture_output=True,
+        )
+    except subprocess.CalledProcessError:
+        pass  # マイグレーションエラーを無視
