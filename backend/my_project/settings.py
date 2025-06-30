@@ -181,13 +181,23 @@ if not DEBUG:
 if not DEBUG:
     import subprocess
     import sys
+    import os
 
     try:
-        subprocess.run(
+        # マイグレーションを実行
+        result = subprocess.run(
             [sys.executable, "manage.py", "migrate", "--noinput"],
             cwd=BASE_DIR,
-            check=True,
             capture_output=True,
+            text=True,
+            timeout=60,
         )
-    except subprocess.CalledProcessError:
+
+        # ログに出力（デバッグ用）
+        print("Migration output:", result.stdout)
+        if result.stderr:
+            print("Migration errors:", result.stderr)
+
+    except Exception as e:
+        print(f"Migration failed: {e}")
         pass  # マイグレーションエラーを無視
