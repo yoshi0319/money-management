@@ -203,22 +203,87 @@ if not DEBUG:
     import subprocess
     import sys
     import os
+    import time
 
+    def run_migrations():
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                print(f"Migration attempt {attempt + 1}/{max_retries}")
+                # メモリ使用量を削減するためのオプションを追加
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        "manage.py",
+                        "migrate",
+                        "--noinput",
+                        "--run-syncdb",
+                    ],
+                    cwd=BASE_DIR,
+                    capture_output=True,
+                    text=True,
+                    timeout=120,
+                    env={**os.environ, "PYTHONOPTIMIZE": "1"},
+                )
+
+                if result.returncode == 0:
+                    print("Migration completed successfully")
+                    print("Migration output:", result.stdout)
+                    return True
+                else:
+                    print(f"Migration failed (attempt {attempt + 1}):")
+                    print("STDOUT:", result.stdout)
+                    print("STDERR:", result.stderr)
+
+                    if attempt < max_retries - 1:
+                        print(f"Retrying in 10 seconds...")
+                        time.sleep(10)
+
+            except Exception as e:
+                print(f"Migration error (attempt {attempt + 1}): {e}")
+                if attempt < max_retries - 1:
+                    print(f"Retrying in 10 seconds...")
+                    time.sleep(10)
+
+        print("All migration attempts failed")
+        return False
+
+    # アプリケーション起動時にマイグレーションを実行
     try:
-        # マイグレーションを実行
-        result = subprocess.run(
-            [sys.executable, "manage.py", "migrate", "--noinput"],
-            cwd=BASE_DIR,
-            capture_output=True,
-            text=True,
-            timeout=60,
-        )
-
-        # ログに出力（デバッグ用）
-        print("Migration output:", result.stdout)
-        if result.stderr:
-            print("Migration errors:", result.stderr)
-
+        run_migrations()
     except Exception as e:
-        print(f"Migration failed: {e}")
-        pass  # マイグレーションエラーを無視
+        print(f"Migration execution failed: {e}")
+        pass  # マイグレーションエラーを無視してアプリケーションを起動
+
+# メモリ使用量を削減するための設定
+if not DEBUG:
+    # セッション設定を最適化
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"
+    SESSION_SAVE_EVERY_REQUEST = False
+
+    # キャッシュ設定
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+            "TIMEOUT": 300,
+            "OPTIONS": {
+                "MAX_ENTRIES": 100,
+            },
+        }
+    }
+
+    # ログ設定を最適化
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+            },
+        },
+        "root": {
+            "handlers": ["console"],
+            "level": "WARNING",
+        },
+    }
