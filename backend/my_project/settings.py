@@ -217,3 +217,8 @@ if not DEBUG:
     except Exception as e:
         print(f"Migration failed: {e}")
         pass  # マイグレーションエラーを無視
+
+# [1mCSRF Trusted Origins[0m
+CSRF_TRUSTED_ORIGINS = [
+    o for o in os.environ.get("TRUSTED_ORIGINS", "").split("@") if o
+]
