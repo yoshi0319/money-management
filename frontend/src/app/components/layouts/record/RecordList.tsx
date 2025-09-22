@@ -143,6 +143,11 @@ export default function RecordList() {
         }
     };
 
+    const handleEdit = (index: number) => {
+        console.log(index);
+
+    }
+
     return (
         <div className="w-2/3 justify-center items-center border-2 border-gray-300 rounded-md p-4 bg-white">
             <table className="w-full">
@@ -170,10 +175,15 @@ export default function RecordList() {
                             <td className="w-1/5 py-3">{record.recorded_money}</td>
                             <td className="w-1/5 py-3">{record.amount}</td>
                             <td className="w-1/5 py-3 text-center">
-                                <Image src="/icons/edit.svg" alt="edit" width={20} height={20} className="relative left-1/2 cursor-pointer"/>
+                                <button
+                                className="pr-5"
+                                onClick={() => handleEdit(index)}>
+                                    <Image src="/icons/edit.svg" alt="edit" width={20} height={20} className="relative left-1/2 cursor-pointer"/>
+                                </button>
                             </td>
                         </tr>
                     ))}
+                    {/* TODO: レコード編集 */}
                 </tbody>
             </table>
             {addMenu_open && (

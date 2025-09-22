@@ -23,8 +23,9 @@ from money_management.views import (
     UserViewSet,
     MoneyViewSet,
     RecordViewSet,
+    CustomTokenObtainPairView,
 )
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 
 def test_api(request):
@@ -44,7 +45,7 @@ urlpatterns = [
     path("", home, name="home"),
     path("admin/", admin.site.urls),
     path("api/test/", test_api, name="test_api"),
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/", include(router.urls)),
 ]

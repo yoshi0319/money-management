@@ -1,5 +1,6 @@
-from django.shortcuts import render
-from rest_framework import viewsets, mixins
+# type: ignore
+from django.shortcuts import render  # type: ignore
+from rest_framework import viewsets, mixins, serializers  # type: ignore
 from .models import User, Money, Record
 from .serializers import (
     UserSerializer,
@@ -7,11 +8,69 @@ from .serializers import (
     RecordSerializer,
     UserRegistrationSerializer,
 )
-from django.db import models, transaction
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from django.db import models, transaction  # type: ignore
+from rest_framework.permissions import IsAuthenticated, AllowAny  # type: ignore
+from rest_framework import status  # type: ignore
+from rest_framework.decorators import api_view  # type: ignore
+from rest_framework.response import Response  # type: ignore
+from rest_framework_simplejwt.views import TokenObtainPairView  # type: ignore
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer  # type: ignore
+
+
+class CustomTokenObtainPairSerializer(serializers.Serializer):
+    email_address = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        # カスタムユーザーモデルで認証
+        from django.contrib.auth import get_user_model  # type: ignore
+
+        User = get_user_model()
+        email_address = attrs.get("email_address")
+        password = attrs.get("password")
+
+        if email_address and password:
+            # メールアドレスでユーザーを検索
+            try:
+                user = User.objects.get(email_address=email_address)
+                if user.check_password(password):
+                    attrs["user"] = user
+                    return attrs
+                else:
+                    raise serializers.ValidationError("認証情報が正しくありません。")
+            except User.DoesNotExist:
+                raise serializers.ValidationError("認証情報が正しくありません。")
+        else:
+            raise serializers.ValidationError(
+                "メールアドレスとパスワードを入力してください。"
+            )
+
+        return attrs
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    def get_serializer_class(self):
+        return CustomTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except serializers.ValidationError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # JWTトークンを生成
+        from rest_framework_simplejwt.tokens import RefreshToken  # type: ignore
+
+        user = serializer.validated_data["user"]
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            }
+        )
 
 
 # Create your views here.
