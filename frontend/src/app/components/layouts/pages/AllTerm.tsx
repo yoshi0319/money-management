@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Image from "next/image";
 import Graph from "../graph/Graph";
 import RecordList from "../record/RecordList";
+import { TabContext } from "../Header/Header";
 
 export default function AllTerm() {
     const [date, setDate] = useState(new Date());
+    const { setDateRange } = useContext(TabContext);
+
+    useEffect(() => {
+        setDateRange([date, date]);
+    }, [date, setDateRange]);
     
     return (
         <div className="flex flex-col items-center justify-center pt-7">

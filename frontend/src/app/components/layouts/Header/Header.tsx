@@ -17,6 +17,8 @@ type TabContextType = {
     setUser: Dispatch<SetStateAction<User | undefined>>;
     dataVersion: number;
     setDataVersion: Dispatch<SetStateAction<number>>;
+    dateRange: [Date | null, Date | null];
+    setDateRange: Dispatch<SetStateAction<[Date | null, Date | null]>>;
 }
 
 const defaultContext: TabContextType = {
@@ -26,14 +28,16 @@ const defaultContext: TabContextType = {
     setUser: () => {},
     dataVersion: 0,
     setDataVersion: () => {},
+    dateRange: [null, null],
+    setDateRange: () => {},
 };
 
 export const TabContext = createContext<TabContextType>(defaultContext);
 
 export default function Header() {
-    const { tabIndex, setTabIndex, user, setUser, dataVersion, setDataVersion } = useContext(TabContext);
+    const { tabIndex, setTabIndex, user, setUser, dataVersion, setDataVersion, dateRange, setDateRange } = useContext(TabContext);
     return (
-        <TabContext.Provider value={{ tabIndex, setTabIndex, user, setUser, dataVersion, setDataVersion }}>
+        <TabContext.Provider value={{ tabIndex, setTabIndex, user, setUser, dataVersion, setDataVersion, dateRange, setDateRange }}>
             <Contents />
         </TabContext.Provider>
     );

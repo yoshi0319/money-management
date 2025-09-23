@@ -14,7 +14,7 @@ export default function RecordList() {
     }
     
     const router = useRouter();
-    const {user, setDataVersion} = useContext(TabContext);
+    const {user, setDataVersion, dataVersion, dateRange} = useContext(TabContext);
     const [records, setRecords] = useState<Record[]>([]);
     const [addMenu_open, setAddMenu_open] = useState(false);
     const [editingRecordId, setEditingRecordId] = useState<number | null>(null);
@@ -35,7 +35,16 @@ export default function RecordList() {
                 if (!user) {
                     return;
                 }
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/?user_id=${user.id}&sort=record_id&order=desc`, {
+                let url = `${process.env.NEXT_PUBLIC_API_URL}/api/record/?user_id=${user.id}&sort=record_id&order=desc`;
+                const [start, end] = dateRange || [null, null];
+                if (start) {
+                    url += `&start_date=${start.toISOString().split('T')[0]}`;
+                }
+                if (end) {
+                    url += `&end_date=${end.toISOString().split('T')[0]}`;
+                }
+
+                const response = await fetch(url, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -53,7 +62,7 @@ export default function RecordList() {
             }
         };
         fetchData();
-    }, [user, router]);
+    }, [user, router, dateRange, dataVersion]);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
