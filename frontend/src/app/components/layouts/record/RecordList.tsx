@@ -14,9 +14,14 @@ export default function RecordList() {
     }
     
     const router = useRouter();
-    const {user} = useContext(TabContext);
+    const {user, setDataVersion} = useContext(TabContext);
     const [records, setRecords] = useState<Record[]>([]);
     const [addMenu_open, setAddMenu_open] = useState(false);
+    const [editingRecordId, setEditingRecordId] = useState<number | null>(null);
+    const [deleteConfirm_open, setDeleteConfirm_open] = useState(false);
+    const [deletingRecord, setDeletingRecord] = useState<Record | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const recordsPerPage = 5;
     const date = new Date().toISOString().split('T')[0];
 
     useEffect(() => {
@@ -52,8 +57,11 @@ export default function RecordList() {
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape' && addMenu_open) {
+            if (event.key === 'Escape' && (addMenu_open || editingRecordId !== null || deleteConfirm_open)) {
                 setAddMenu_open(false);
+                setEditingRecordId(null);
+                setDeleteConfirm_open(false);
+                setDeletingRecord(null);
             }
         };
 
@@ -62,7 +70,7 @@ export default function RecordList() {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [addMenu_open]);
+    }, [addMenu_open, editingRecordId, deleteConfirm_open]);
 
     const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -136,6 +144,7 @@ export default function RecordList() {
 
             const updatedData = await updatedResponse.json();
             setRecords(updatedData);
+            setDataVersion((v) => v + 1);
             
             setAddMenu_open(false);
         } catch (e) {
@@ -143,21 +152,268 @@ export default function RecordList() {
         }
     };
 
-    const handleEdit = (index: number) => {
-        console.log(index);
+    const handleEdit = (recordId: number) => {
+        setEditingRecordId(recordId);
+    };
 
-    }
+    const handleUpdate = async (recordId: number, newDate: string, newMethod: string, newRecordedMoney: number) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                router.push('/auth/login');
+                return;
+            }
+            if (!user) {
+                return;
+            }
+
+            const updateData = {
+                user_id: user.id,
+                date: newDate,
+                method: newMethod,
+                recorded_money: newRecordedMoney,
+            };
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/${recordId}/`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(updateData),
+            });            
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error response:', errorData);
+                throw new Error(`データの更新に失敗しました: ${response.status} ${JSON.stringify(errorData)}`);
+            }
+
+            const data = await response.json();
+            console.log('Update response:', data);
+
+            // 更新後のデータを再取得
+            const updatedResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/?user_id=${user.id}&sort=record_id&order=desc`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+            });
+
+            if (!updatedResponse.ok) {
+                throw new Error("更新後のデータの取得に失敗しました");
+            }
+
+            const updatedData = await updatedResponse.json();
+            console.log('編集後のデータ:', updatedData);
+            setRecords(updatedData);
+            setDataVersion((v) => v + 1);
+            console.log('レコード一覧を更新しました（編集）');
+            
+            // 現在のページが存在しなくなった場合は前のページに移動
+            const newTotalPages = Math.ceil(updatedData.length / recordsPerPage);
+            if (currentPage > newTotalPages && newTotalPages > 0) {
+                setCurrentPage(newTotalPages);
+            }
+            
+            setEditingRecordId(null);
+        } catch (e) {
+            console.error("エラーが発生しました。: ", e);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingRecordId(null);
+    };
+
+    // ページネーション計算
+    const totalRecords = records.length;
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = startIndex + recordsPerPage;
+    const currentRecords = records.slice(startIndex, endIndex);
+    const startRecord = startIndex + 1;
+    const endRecord = Math.min(endIndex, totalRecords);
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const EditableRow = ({ record }: { record: Record }) => {
+        const [editData, setEditData] = useState({
+            date: record.date,
+            method: record.method,
+            recorded_money: record.recorded_money.toString()
+        });
+
+        const handleSave = () => {
+            console.log('保存ボタンがクリックされました');
+            const moneyValue = parseFloat(editData.recorded_money);
+            if (isNaN(moneyValue)) {
+                alert('in / outは数値で入力してください');
+                return;
+            }
+            if (!editData.method || editData.method === '') {
+                alert('methodを選択してください');
+                return;
+            }
+            console.log('更新データ:', { recordId: record.record_id, date: editData.date, method: editData.method, money: moneyValue });
+            handleUpdate(record.record_id, editData.date, editData.method, moneyValue);
+        };
+
+        return (
+            <tr className="border-b border-gray-400 bg-blue-50">
+                <td className="w-1/6 py-2">
+                    <input
+                        type="date"
+                        value={editData.date}
+                        onChange={(e) => setEditData({...editData, date: e.target.value})}
+                        className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs h-6"
+                    />
+                </td>
+                <td className="w-1/6 py-2">
+                    <select
+                        value={editData.method}
+                        onChange={(e) => setEditData({...editData, method: e.target.value})}
+                        className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs h-6"
+                    >
+                        <option value="">--選択--</option>
+                        <option value="convenience_store">コンビニ</option>
+                        <option value="food">飲食店</option>
+                        <option value="supermarket">スーパー</option>
+                        <option value="cafe">カフェ</option>
+                        <option value="other">その他</option>
+                    </select>
+                </td>
+                <td className="w-1/6 py-2">
+                    <input
+                        type="text"
+                        value={editData.recorded_money}
+                        onChange={(e) => setEditData({...editData, recorded_money: e.target.value})}
+                        className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs h-6"
+                    />
+                </td>
+                <td className="w-1/6 py-2 text-sm">{record.amount}</td>
+                <td className="w-1/12 py-2"></td>
+                <td className="w-1/12 py-2 text-center">
+                    <div className="flex justify-center gap-1">
+                        <button
+                            className="bg-gray-800 text-white px-2 py-1 rounded hover:bg-gray-700 h-6 w-6 flex items-center justify-center"
+                            onClick={handleSave}
+                            title="保存"
+                        >
+                            ✓
+                        </button>
+                        <button
+                            className="bg-gray-400 text-white px-2 py-1 rounded hover:bg-gray-500 h-6 w-6 flex items-center justify-center"
+                            onClick={handleCancelEdit}
+                            title="キャンセル"
+                        >
+                            ✕
+                        </button>
+                        <button
+                            className="bg-white border border-gray-400 text-gray-800 px-2 py-1 rounded hover:bg-gray-100 h-6 w-6 flex items-center justify-center"
+                            onClick={() => handleDelete(record)}
+                            title="削除"
+                        >
+                            🗑
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        );
+    };
+
+    const handleDelete = (record: Record) => {
+        setDeletingRecord(record);
+        setDeleteConfirm_open(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!deletingRecord) return;
+        
+        console.log('削除確認ボタンがクリックされました');
+        console.log('削除対象レコード:', deletingRecord);
+        
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                router.push('/auth/login');
+                return;
+            }
+            if (!user) {
+                return;
+            }
+
+            console.log('削除API呼び出し開始:', `${process.env.NEXT_PUBLIC_API_URL}/api/record/${deletingRecord.record_id}/`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/${deletingRecord.record_id}/`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+            });            
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error response:', errorData);
+                throw new Error(`データの削除に失敗しました: ${response.status} ${JSON.stringify(errorData)}`);
+            }
+
+            console.log('Delete successful');
+
+            // 削除後のデータを再取得
+            console.log('削除後のデータ再取得開始');
+            const updatedResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/?user_id=${user.id}&sort=record_id&order=desc`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+            });
+
+            if (!updatedResponse.ok) {
+                throw new Error("削除後のデータの取得に失敗しました");
+            }
+
+            const updatedData = await updatedResponse.json();
+            console.log('更新後のデータ:', updatedData);
+            setRecords(updatedData);
+            console.log('レコード一覧を更新しました');
+            
+            // 現在のページが存在しなくなった場合は前のページに移動
+            const newTotalPages = Math.ceil(updatedData.length / recordsPerPage);
+            if (currentPage > newTotalPages && newTotalPages > 0) {
+                setCurrentPage(newTotalPages);
+            }
+            
+            setDeleteConfirm_open(false);
+            setDeletingRecord(null);
+        } catch (e) {
+            console.error("エラーが発生しました。: ", e);
+        }
+    };
 
     return (
         <div className="w-2/3 justify-center items-center border-2 border-gray-300 rounded-md p-4 bg-white">
             <table className="w-full">
                 <thead className="border-b border-gray-400">
                     <tr className="text-left">
-                        <th className="w-1/5 pb-2">date</th>
-                        <th className="w-1/5 pb-2">method</th>
-                        <th className="w-1/5 pb-2">in / out</th>
-                        <th className="w-1/5 pb-2">amount</th>
-                        <th className="w-1/5 pb-2 text-center">
+                        <th className="w-1/6 pb-2">date</th>
+                        <th className="w-1/6 pb-2">method</th>
+                        <th className="w-1/6 pb-2">in / out</th>
+                        <th className="w-1/6 pb-2">amount</th>
+                        <th className="w-1/12 pb-2"></th>
+                        <th className="w-1/12 pb-2 text-center">
                             <button 
                                 className="bg-blue-400 text-white rounded-md px-4 py-1 cursor-pointer hover:bg-blue-300"
                                 onClick={() => setAddMenu_open(!addMenu_open)}
@@ -168,22 +424,28 @@ export default function RecordList() {
                     </tr>
                 </thead>
                 <tbody>
-                    {records.slice(0, 5).map((record, index) => (
+                    {currentRecords.map((record, index) => (
+                        editingRecordId === record.record_id ? (
+                            <EditableRow key={index} record={record} />
+                        ) : (
                         <tr key={index} className="border-b border-gray-400">
-                            <td className="w-1/5 py-3">{record.date}</td>
-                            <td className="w-1/5 py-3">{record.method}</td>
-                            <td className="w-1/5 py-3">{record.recorded_money}</td>
-                            <td className="w-1/5 py-3">{record.amount}</td>
-                            <td className="w-1/5 py-3 text-center">
+                                <td className="w-1/6 py-3">{record.date}</td>
+                                <td className="w-1/6 py-3">{record.method}</td>
+                                <td className="w-1/6 py-3">{record.recorded_money}</td>
+                                <td className="w-1/6 py-3">{record.amount}</td>
+                                <td className="w-1/12 py-3"></td>
+                                <td className="w-1/12 py-3 text-center">
+                                    <div className="flex justify-center gap-2">
                                 <button
-                                className="pr-5"
-                                onClick={() => handleEdit(index)}>
-                                    <Image src="/icons/edit.svg" alt="edit" width={20} height={20} className="relative left-1/2 cursor-pointer"/>
+                                            className="cursor-pointer"
+                                            onClick={() => handleEdit(record.record_id)}>
+                                            <Image src="/icons/edit.svg" alt="edit" width={20} height={20} className="cursor-pointer"/>
                                 </button>
+                                    </div>
                             </td>
                         </tr>
+                        )
                     ))}
-                    {/* TODO: レコード編集 */}
                 </tbody>
             </table>
             {addMenu_open && (
@@ -222,6 +484,66 @@ export default function RecordList() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {deleteConfirm_open && deletingRecord && (
+                <div className="fixed bg-black/20 w-full h-full top-0 left-0 z-10">
+                    <div className="fixed bg-white border-1 rounded-md border-[#E2E8F0] shadow-md w-1/4 h-1/4 top-1/3 left-1/3">
+                        <div className="p-6">
+                            <h3 className="text-lg font-semibold mb-4">削除の確認</h3>
+                            <p className="mb-6">
+                                このレコードを削除しますか？<br />
+                                <span className="font-medium">
+                                    {deletingRecord.date} - {deletingRecord.method} - ¥{deletingRecord.recorded_money}
+                                </span>
+                            </p>
+                            <div className="flex justify-end gap-3">
+                                <button 
+                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+                                    onClick={() => {setDeleteConfirm_open(false); setDeletingRecord(null);}}
+                                >
+                                    キャンセル
+                                </button>
+                                <button 
+                                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                                    onClick={confirmDelete}
+                                >
+                                    削除
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {totalRecords > 0 && (
+                <div className="flex justify-end items-center gap-3 mt-4 pr-4">
+                    <span className="text-sm text-gray-600">
+                        {startRecord}-{endRecord} of {totalRecords}
+                    </span>
+                    <div className="flex gap-1">
+                        <button
+                            onClick={handlePreviousPage}
+                            disabled={currentPage === 1}
+                            className={`px-3 py-1 text-sm ${
+                                currentPage === 1
+                                    ? 'text-gray-400 cursor-not-allowed'
+                                    : 'text-gray-700 hover:text-gray-900 cursor-pointer'
+                            }`}
+                        >
+                            &lt;
+                        </button>
+                        <button
+                            onClick={handleNextPage}
+                            disabled={currentPage === totalPages}
+                            className={`px-3 py-1 text-sm ${
+                                currentPage === totalPages
+                                    ? 'text-gray-400 cursor-not-allowed'
+                                    : 'text-gray-700 hover:text-gray-900 cursor-pointer'
+                            }`}
+                        >
+                            &gt;
+                        </button>
                     </div>
                 </div>
             )}

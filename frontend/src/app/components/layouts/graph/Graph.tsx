@@ -30,7 +30,7 @@ type CustomLegendProps = {
 
 export default function Graph({ dateRange }: GraphProps) {
     const router = useRouter();
-    const { user } = useContext(TabContext);
+    const { user, dataVersion } = useContext(TabContext);
     const [data, setData] = useState([
         { name: 'コンビニ', value: 0 },
         { name: '飲食店', value: 0 },
@@ -101,7 +101,7 @@ export default function Graph({ dateRange }: GraphProps) {
             }
         }
         fetchData();
-    }, [user, dateRange, router]);
+    }, [user, dateRange, router, dataVersion]);
 
     const DynamicPieChart = dynamic(
         () => Promise.resolve(PieChart),

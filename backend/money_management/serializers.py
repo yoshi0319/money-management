@@ -65,13 +65,15 @@ class MoneySerializer(serializers.ModelSerializer):
 
 
 class RecordSerializer(serializers.ModelSerializer):
-    record_id = serializers.SerializerMethodField()
+    # 表示用の連番。実データの主キーではない
+    display_id = serializers.SerializerMethodField()
     method_display = serializers.CharField(source="get_method_display", read_only=True)
 
     class Meta:
         model = Record
         fields = (
-            "record_id",
+            "record_id",  # 実PK（models.AutoField primary_key）
+            "display_id",  # 表示用の連番
             "user_id",
             "date",
             "method",
@@ -80,9 +82,9 @@ class RecordSerializer(serializers.ModelSerializer):
             "amount",
             "updated_at",
         )
-        read_only_fields = ("record_id", "amount", "updated_at")
+        read_only_fields = ("record_id", "display_id", "amount", "updated_at")
 
-    def get_record_id(self, obj):
+    def get_display_id(self, obj):
         return Record.objects.filter(
             user_id=obj.user_id, record_id__lte=obj.record_id
         ).count()
