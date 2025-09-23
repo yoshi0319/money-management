@@ -27,6 +27,7 @@ export default function Dashboard() {
     const [tabIndex, setTabIndex] = useState(0);
     const [user, setUser] = useState<User>();
     const [dataVersion, setDataVersion] = useState(0);
+    const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,7 +68,7 @@ export default function Dashboard() {
     }, [router]);
 
     return (
-        <TabContext.Provider value={{ tabIndex, setTabIndex, user, setUser, dataVersion, setDataVersion }}>
+        <TabContext.Provider value={{ tabIndex, setTabIndex, user, setUser, dataVersion, setDataVersion, dateRange, setDateRange }}>
             <div className="flex flex-col min-h-screen">
                 <Header />
             </div>
