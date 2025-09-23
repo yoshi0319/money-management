@@ -14,7 +14,7 @@ export default function RecordList() {
     }
     
     const router = useRouter();
-    const {user} = useContext(TabContext);
+    const {user, setDataVersion} = useContext(TabContext);
     const [records, setRecords] = useState<Record[]>([]);
     const [addMenu_open, setAddMenu_open] = useState(false);
     const [editingRecordId, setEditingRecordId] = useState<number | null>(null);
@@ -144,6 +144,7 @@ export default function RecordList() {
 
             const updatedData = await updatedResponse.json();
             setRecords(updatedData);
+            setDataVersion((v) => v + 1);
             
             setAddMenu_open(false);
         } catch (e) {
@@ -207,6 +208,7 @@ export default function RecordList() {
             const updatedData = await updatedResponse.json();
             console.log('編集後のデータ:', updatedData);
             setRecords(updatedData);
+            setDataVersion((v) => v + 1);
             console.log('レコード一覧を更新しました（編集）');
             
             // 現在のページが存在しなくなった場合は前のページに移動
