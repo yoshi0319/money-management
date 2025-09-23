@@ -20,6 +20,8 @@ export default function RecordList() {
     const [editingRecordId, setEditingRecordId] = useState<number | null>(null);
     const [deleteConfirm_open, setDeleteConfirm_open] = useState(false);
     const [deletingRecord, setDeletingRecord] = useState<Record | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const recordsPerPage = 5;
     const date = new Date().toISOString().split('T')[0];
 
     useEffect(() => {
@@ -203,7 +205,15 @@ export default function RecordList() {
             }
 
             const updatedData = await updatedResponse.json();
+            console.log('編集後のデータ:', updatedData);
             setRecords(updatedData);
+            console.log('レコード一覧を更新しました（編集）');
+            
+            // 現在のページが存在しなくなった場合は前のページに移動
+            const newTotalPages = Math.ceil(updatedData.length / recordsPerPage);
+            if (currentPage > newTotalPages && newTotalPages > 0) {
+                setCurrentPage(newTotalPages);
+            }
             
             setEditingRecordId(null);
         } catch (e) {
@@ -215,6 +225,27 @@ export default function RecordList() {
         setEditingRecordId(null);
     };
 
+    // ページネーション計算
+    const totalRecords = records.length;
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = startIndex + recordsPerPage;
+    const currentRecords = records.slice(startIndex, endIndex);
+    const startRecord = startIndex + 1;
+    const endRecord = Math.min(endIndex, totalRecords);
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
     const EditableRow = ({ record }: { record: Record }) => {
         const [editData, setEditData] = useState({
             date: record.date,
@@ -223,6 +254,7 @@ export default function RecordList() {
         });
 
         const handleSave = () => {
+            console.log('保存ボタンがクリックされました');
             const moneyValue = parseFloat(editData.recorded_money);
             if (isNaN(moneyValue)) {
                 alert('in / outは数値で入力してください');
@@ -232,6 +264,7 @@ export default function RecordList() {
                 alert('methodを選択してください');
                 return;
             }
+            console.log('更新データ:', { recordId: record.record_id, date: editData.date, method: editData.method, money: moneyValue });
             handleUpdate(record.record_id, editData.date, editData.method, moneyValue);
         };
 
@@ -306,6 +339,9 @@ export default function RecordList() {
     const confirmDelete = async () => {
         if (!deletingRecord) return;
         
+        console.log('削除確認ボタンがクリックされました');
+        console.log('削除対象レコード:', deletingRecord);
+        
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -316,6 +352,7 @@ export default function RecordList() {
                 return;
             }
 
+            console.log('削除API呼び出し開始:', `${process.env.NEXT_PUBLIC_API_URL}/api/record/${deletingRecord.record_id}/`);
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/${deletingRecord.record_id}/`, {
                 method: "DELETE",
                 headers: {
@@ -333,6 +370,7 @@ export default function RecordList() {
             console.log('Delete successful');
 
             // 削除後のデータを再取得
+            console.log('削除後のデータ再取得開始');
             const updatedResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/record/?user_id=${user.id}&sort=record_id&order=desc`, {
                 method: "GET",
                 headers: {
@@ -346,7 +384,15 @@ export default function RecordList() {
             }
 
             const updatedData = await updatedResponse.json();
+            console.log('更新後のデータ:', updatedData);
             setRecords(updatedData);
+            console.log('レコード一覧を更新しました');
+            
+            // 現在のページが存在しなくなった場合は前のページに移動
+            const newTotalPages = Math.ceil(updatedData.length / recordsPerPage);
+            if (currentPage > newTotalPages && newTotalPages > 0) {
+                setCurrentPage(newTotalPages);
+            }
             
             setDeleteConfirm_open(false);
             setDeletingRecord(null);
@@ -376,7 +422,7 @@ export default function RecordList() {
                     </tr>
                 </thead>
                 <tbody>
-                    {records.slice(0, 5).map((record, index) => (
+                    {currentRecords.map((record, index) => (
                         editingRecordId === record.record_id ? (
                             <EditableRow key={index} record={record} />
                         ) : (
@@ -465,6 +511,37 @@ export default function RecordList() {
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+            {totalRecords > 0 && (
+                <div className="flex justify-end items-center gap-3 mt-4 pr-4">
+                    <span className="text-sm text-gray-600">
+                        {startRecord}-{endRecord} of {totalRecords}
+                    </span>
+                    <div className="flex gap-1">
+                        <button
+                            onClick={handlePreviousPage}
+                            disabled={currentPage === 1}
+                            className={`px-3 py-1 text-sm ${
+                                currentPage === 1
+                                    ? 'text-gray-400 cursor-not-allowed'
+                                    : 'text-gray-700 hover:text-gray-900 cursor-pointer'
+                            }`}
+                        >
+                            &lt;
+                        </button>
+                        <button
+                            onClick={handleNextPage}
+                            disabled={currentPage === totalPages}
+                            className={`px-3 py-1 text-sm ${
+                                currentPage === totalPages
+                                    ? 'text-gray-400 cursor-not-allowed'
+                                    : 'text-gray-700 hover:text-gray-900 cursor-pointer'
+                            }`}
+                        >
+                            &gt;
+                        </button>
                     </div>
                 </div>
             )}
